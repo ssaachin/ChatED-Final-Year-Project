@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>ChatED.</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' media='screen' href='styles/main.css'>
+    <link rel='stylesheet' type='text/css' media='screen' href='styles/lobby.css'>
+    <head>
+        <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+        />
+      </head>
+</head>
+<body>
+
+    <main id="room__lobby__container" class="room__lobby__container animate__animated animate__bounce">
+        <div class="lobby__header">
+            <header class="lobbyTitle__header">Chat<span class="lobbyEd">ED.</span></header>
+            <!-- <img src="./images/hot-face-telegram.gif" alt="hot face"/>  -->
+            <p class="about__container">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                 Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                  Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint 
+                  occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum</p>
+        </div>
+
+
+        <div id="form__container">
+             <div id="form__container__header">
+                <header class="chat__title" >Chat<span class="ed__title" >ED.</span></header>
+             </div>
+ 
+ 
+            <form id="lobby__form">
+ 
+                 <div class="form__field__wrapper">
+                     <label>Enter a name</label>
+                     <input type="text" name="name" required placeholder="Enter your display name..." />
+                 </div>
+ 
+                 <div class="form__field__wrapper">
+                     <label>Room Name</label>
+                     <input type="text" name="room"  placeholder="Enter room name..." />
+                 </div>
+ 
+                 <div class="form__field__wrapper">
+                    <button type="submit">
+                        Start
+                    </button>
+                 </div>
+            </form>
+        </div>
+        
+     </main>
+    <section class="support__container"> 
+        <!-- <header class="support__title">ChatEd was created using</header> -->
+        <div class="support__Img">
+            <img src="./images/agora_logo.png" alt="agora logo"/>
+            <img src="./images/bootStrap.png" alt="bootstrap logo"/>
+            <img src="./images/logo.png" alt="javascript logo"/>
+            <img src="./images/vsCode.png" alt="vs code logo"/>
+            <img src="./images/RTC_logo.png" alt="vs code logo"/>
+        </div>
+    </section>
+</body>
+<script type="text/javascript" src="js/lobby.js"></script>
+</html>
