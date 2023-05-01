@@ -59,7 +59,7 @@ body {
 }
 
 #form__container:hover {
-  transform: scale(1.2);
+  transform: scale(1.1);
 }
 
 
@@ -158,5 +158,55 @@ body {
   mix-blend-mode: color-burn;
 }
 
+
+@media (max-width: 900px) {
+  
+  .lobby__header {
+    width: 100%;
+    max-width: 400px;
+  }
+
+}
+
+@media (max-width: 805px) {
+  
+  .lobby__header {
+    display: none;
+  }
+
+}
+
+@media (max-width: 610px) {
+
+  #form__container {
+    width: 100%;
+    max-width: 400px;
+    border-radius: 5px;
+    background-color: #262625;
+    margin: 30px;
+    /* border: solid 2px red; */
+    transition: all .5s ease-in-out;
+  }
+}
+
+@media (max-width: 400px) {
+
+  #form__container {
+    width: 100%;
+    max-width: 400px;
+    border-radius: 5px;
+    background-color: #262625;
+    margin: 20px;
+    /* border: solid 2px red; */
+    transition: all .5s ease-in-out;
+  }
+
+  .support__container {
+    /* border: red 1px solid; */
+    margin: auto;
+    width: 100%;
+   
+  }
+}
 
 

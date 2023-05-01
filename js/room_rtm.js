@@ -5,15 +5,83 @@ async function handleChannelMessage(messageData, memberId) {
         addMessageToDom(data.displayName, data.message);
     } else if (data.type === 'borderColor') {
         changeUserBorderColor(data.uid, data.color);
-        if (data.incrementSlider) {
-            incrementSliderValue(data.uid, 1);
-        }
     } else if (data.type === 'muteUpdate') {
         incrementSliderValue(data.uid, data.incrementValue);
     } else if (data.type === 'notification') {
         addNotificationToDom(data.uid, data.action);
+    } else if (data.type === 'taskEvent') {
+        handleTaskEvent(data.eventType, data.payload);
     }
-};
+    
+
+}
+
+function handleTaskEvent(eventType, payload) {
+    if (eventType === 'taskAdded') {
+        addTask(payload);
+    }
+}
+
+let taskForm = document.getElementById('task__form');
+taskForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    let task = e.target.task.value;
+    await sendTask(task);
+    addTask(task);
+    e.target.reset();
+});
+
+
+function addTask(task) {
+    let tasksWrapper = document.getElementById('tasks');
+
+    let newTask = ` <div class="task__wrapper">
+    <p class="task__text">${task}</p>
+    <button class="task__edit"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+        <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+        <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
+      </svg></button>
+    <button class="task__delete">X</button>
+</div>`;
+
+    tasksWrapper.insertAdjacentHTML('beforeend', newTask);
+
+    let taskWrapper = tasksWrapper.lastElementChild;
+    taskWrapper.querySelector('.task__text').addEventListener('click', () => {
+        taskWrapper.querySelector('.task__text').classList.toggle('line-through');
+    });
+    taskWrapper.querySelector('.task__edit').addEventListener('click', editTask);
+    taskWrapper.querySelector('.task__delete').addEventListener('click', deleteTask);
+}
+
+function editTask(e) {
+    let taskText = e.target.previousElementSibling;
+    let currentText = taskText.innerText;
+    let newText = prompt("Edit task:", currentText);
+
+    if (newText) {
+        taskText.innerText = newText;
+    }
+}
+
+function deleteTask(e) {
+    let taskWrapper = e.target.parentElement;
+    taskWrapper.remove();
+}
+
+
+async function sendTask(task) {
+    const taskMessage = JSON.stringify({ 'type': 'taskEvent', 'eventType': 'taskAdded', 'payload': task });
+    await channel.sendMessage({ text: taskMessage });
+}
+
+
+
+// else if (data.type === 'taskEvent') {
+//     handleTaskEvent(data.eventType, data.payload);
+// }
+
 
 async function sendMessage(e) {
     e.preventDefault();
@@ -26,10 +94,13 @@ async function sendMessage(e) {
 
 function addMessageToDom(name, message) {
     let messagesWrapper = document.getElementById('messages');
+    let currentTime = formatTime(new Date());
 
     let newMessage = `<div class="message__wrapper">
                         <div class="message__body">
+                        
                             <strong class="message__author">${name}</strong>
+                            <span class="task__time">${currentTime}</span>
                             <p class="message__text">${message}</p>
                         </div>
                       </div>`;
@@ -42,17 +113,30 @@ function addMessageToDom(name, message) {
     }
 };
 
+function formatTime(date) {
+    let hours = date.getHours();
+    let minutes = date.getMinutes();
+
+    // Add leading zeros if needed
+    hours = hours < 10 ? '0' + hours : hours;
+    minutes = minutes < 10 ? '0' + minutes : minutes;
+
+    return `${hours}:${minutes}`;
+}
+
+
 async function leaveChannel() {
     await channel.leave();
     await rtmClient.logout();
 };
 
-function incrementSliderValue(uid, incrementValue) {
-    const slider = document.querySelector(`#user-container-${uid} .video__slider input[type="range"]`);
-    if (slider) {
-        slider.value = Math.max(0, Math.min(parseInt(slider.value) + incrementValue, parseInt(slider.max)));
-    }
-};
+
+function incrementSliderValue(uid, increment) {
+    let slider = document.getElementById(`user-container-${uid}`).querySelector('.smiley-slider');
+    let newValue = parseFloat(slider.value) + increment;
+    updateSmiley(uid, newValue);
+}
+
 
 async function sendMuteUpdate(incrementValue) {
     const muteUpdateMessage = JSON.stringify({ 'type': 'muteUpdate', 'uid': uid, 'incrementValue': incrementValue });
@@ -61,6 +145,7 @@ async function sendMuteUpdate(incrementValue) {
 
 function addNotificationToDom(userId, action) {
     let notificationContainer = document.getElementById('Notification__container');
+    let currentTime = formatTime(new Date());
     let message;
 
     if (userId === uid) {
@@ -69,12 +154,15 @@ function addNotificationToDom(userId, action) {
         message = `User ${userId} said ${action === 'green' ? 'Yes' : 'No'}`;
     }
 
-    let newNotification = `<div class="notification__wrapper">
+    let newNotification = `<div class="notification__wrapper" id="notifications__container">
                             <p class="notification__text">${message}</p>
-                          </div>`;
+                            <span class="task__time">${currentTime}</span>
+                        </div>`;
 
     notificationContainer.insertAdjacentHTML('beforeend', newNotification);
 };
+
+  
 
 function changeUserBorderColor(uid, color) {
     const userVideoContainer = document.getElementById(`user-container-${uid}`);
@@ -91,7 +179,7 @@ async function sendBorderColorChange(color, incrementSlider = false) {
 
 document.getElementById('green-btn').addEventListener('click', async () => {
     changeUserBorderColor(uid, 'green');
-    incrementSliderValue(uid);
+    // incrementSliderValue(uid);
     sendBorderColorChange('green', true);
     const notificationMessage = JSON.stringify({ 'type': 'notification', 'uid': uid, 'action': 'green' });
     await channel.sendMessage({ text: notificationMessage });
@@ -100,7 +188,7 @@ document.getElementById('green-btn').addEventListener('click', async () => {
 
 document.getElementById('red-btn').addEventListener('click', async () => {
     changeUserBorderColor(uid, 'red');
-    incrementSliderValue(uid);
+    // incrementSliderValue(uid);
     sendBorderColorChange('red', true);
     const notificationMessage = JSON.stringify({ 'type': 'notification', 'uid': uid, 'action': 'red' });
     await channel.sendMessage({ text: notificationMessage });
@@ -110,105 +198,3 @@ document.getElementById('red-btn').addEventListener('click', async () => {
 window.addEventListener('beforeunload', leaveChannel);
 let messageForm = document.getElementById('message__form');
 messageForm.addEventListener('submit', sendMessage);
-
-
-
-
-
-
-
-
-
-// async function handleChannelMessage(messageData, memberId) {
-//     let data = JSON.parse(messageData.text);
-
-//     if (data.type === 'chat') {
-//         addMessageToDom(data.displayName, data.message);
-//     } else if (data.type === 'borderColor') {
-//         changeUserBorderColor(data.uid, data.color);
-//         if (data.incrementSlider) {
-//             incrementSliderValue(data.uid, 1);
-//         }
-//     } else if (data.type === 'muteUpdate') {
-//         incrementSliderValue(data.uid, data.incrementValue);
-//     }
-// };
-
-// async function sendMessage(e) {
-//     e.preventDefault();
-
-//     let message = e.target.message.value;
-//     await channel.sendMessage({ text: JSON.stringify({ 'type': 'chat', 'message': message, 'displayName': displayName }) });
-//     addMessageToDom(displayName, message);
-//     e.target.reset();
-// };
-
-// function addMessageToDom(name, message) {
-//     let messagesWrapper = document.getElementById('messages');
-
-//     let newMessage = `<div class="message__wrapper">
-//                         <div class="message__body">
-//                             <strong class="message__author">${name}</strong>
-//                             <p class="message__text">${message}</p>
-//                         </div>
-//                       </div>`;
-
-//     messagesWrapper.insertAdjacentHTML('beforeend', newMessage);
-
-//     let lastMessage = document.querySelector('#messages .message__wrapper:last-child');
-//     if (lastMessage) {
-//         lastMessage.scrollIntoView();
-//     }
-// };
-
-// async function leaveChannel() {
-//     await channel.leave();
-//     await rtmClient.logout();
-// };
-
-// function incrementSliderValue(uid, incrementValue) {
-//     const slider = document.querySelector(`#user-container-${uid} .video__slider input[type="range"]`);
-//     if (slider) {
-//         slider.value = Math.max(0, Math.min(parseInt(slider.value) + incrementValue, parseInt(slider.max)));
-//     }
-// };
-
-// async function sendMuteUpdate(incrementValue) {
-//     const muteUpdateMessage = JSON.stringify({ 'type': 'muteUpdate', 'uid': uid, 'incrementValue': incrementValue });
-//     await channel.sendMessage({ text: muteUpdateMessage });
-// };
-
-// function changeUserBorderColor(uid, color) {
-//     const userVideoContainer = document.getElementById(`user-container-${uid}`);
-//     if (userVideoContainer) {
-//         userVideoContainer.classList.remove('border-green', 'border-red');
-//         userVideoContainer.classList.add(`border-${color}`);
-//     }
-// };
-
-// async function sendBorderColorChange(color, incrementSlider = false) {
-//     const borderColorMessage = JSON.stringify({ 'type': 'borderColor', 'uid': uid, 'color': color, 'incrementSlider': incrementSlider });
-//     await channel.sendMessage({ text: borderColorMessage });
-// };
-
-// document.getElementById('green-btn').addEventListener('click', () => {
-//     changeUserBorderColor(uid, 'green');
-//     incrementSliderValue(uid);
-//     sendBorderColorChange('green', true);
-// });
-
-// document.getElementById('red-btn').addEventListener('click', () => {
-//     changeUserBorderColor(uid, 'red');
-//     incrementSliderValue(uid);
-//     sendBorderColorChange('red', true);
-// });
-
-// window.addEventListener('beforeunload', leaveChannel);
-// let messageForm = document.getElementById('message__form');
-// messageForm.addEventListener('submit', sendMessage);
-
-
-
-
-
-

@@ -45,13 +45,13 @@
 }
 
 .title__container {
-  border-radius: 5px;
-  padding: 10px;
+   border-radius: 5px;
+  /* padding: 10px; */
   text-align: center;
   background-color: #363739;
-  font-size: 18px;
   line-height: 0;
-  margin: 10px;
+  margin: 5px; 
+  /* border: red 1px solid; */
 }
 
 .goals__title {
@@ -61,11 +61,12 @@
   letter-spacing: -3px;
   text-transform: uppercase;
   font-family: "BitCrusherCdRg"; */
-  font-size: 40px;
+  font-size: 30px;
   letter-spacing: -3px;
+  text-decoration: underline;
 }
 
-#clearAllTasks {
+/* #clearAllTasks {
   border-radius: 5px;
   background-color: red;
   color: white;
@@ -82,42 +83,73 @@
   border-radius: 5px;
   background-color: black;
   color: white;
-}
+} */
 
-.delete-btn{
+.task__delete{
   border-radius: 5px;
-  background-color: black;
+  background-color: red;
   color: white;
   margin: 5px;
+  /* border: red 1px solid; */
+  height: 45%;
+  /* bottom: ; */
 }
 
-.edit-btn{
+.task__edit{
   border-radius: 5px;
-  background-color: black;
-  color: white;
-  margin: 10px;
+  background-color: white;
+  color: black;
+  margin: 5px;
+  /* border: red 1px solid; */
+  height: 45%;
+  font-weight: 900px;
 }
 
-#taskList {
+.task__text {
+   /* border: red 1px solid; */
+   width: 90%;
+   margin: 5px;
+   overflow-y: auto;
+}
+
+#tasks {
   /* border: solid 2px red; */
   height: 100%;
-  width: 95%;
+  width: 100%;
   overflow-y: auto;
   font-size: medium;
   letter-spacing: -0.5px;
+  /* border: green 1px solid; */
+
 }
 
-#taskInput {
+.task__wrapper {
+  background-color: teal;
+  width: 95%;
+  height: 40%;
+  border-radius: 5px;
+  /* padding: 10px; */
+  /* border: red 1px solid; */
+  margin: 10px 10px 10px 9px ;
+  display: flex;
+}
+
+#task__form {
+  padding: 5px;
+  /* border: solid 2px red; */
+}
+
+.taskInput {
   color: #fff;
   border: none;
   border-radius: 5px;
-  padding: 10px;
+  padding: 5px;
   font-size: 14px;
   /* border: solid 2px red; */
-  background-color: #3f434a; 
+  background-color: #3f434a;
 }
 
-#taskInput input:focus {
+.taskInput input:focus {
   outline: none;
 }
 
@@ -147,6 +179,10 @@
   margin-bottom: 1rem;
 }
 
+.notification__wrapper:last-child {
+  margin-bottom: 5rem;
+}
+
 .message__wrapper {
   display: flex;
   gap: 10px;
@@ -158,8 +194,10 @@
   border-radius: 10px;
   padding: 10px 15px;
   width: fit-content;
-  max-width: 900px;
-  
+  max-width: 350px;
+  /* border: red solid 2px; */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .message__body strong {
@@ -173,11 +211,24 @@
   margin-right: 10px;
   color: teal !important;
   text-decoration: 2px underline;
-
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  /* border: red solid 2px; */
+  max-width: 345px;
 }
 
 .message__text {
   margin: 0;
+  /* border: red solid 2px; */
+  max-width: 345px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.task__time {
+  float: right;
+  /* border: red 2px solid; */
+  font-weight: 500;
 }
 
 #message__form {
@@ -328,12 +379,12 @@
     width: 100%;
   }
   /* #stream__actions {
-    left: 10%;
+    left: 0%;
   } */
 
   .video__container{
-    height: 100px;
-    width: 100px;
+    height: 300px;
+    width: 400px;
   }
 
   #messages__container {
@@ -407,7 +458,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 2px solid green;
+  border: 5px solid green;
+  border-radius: 5px;
   overflow: hidden;
   height: 300px;
   width: 400px;
@@ -430,6 +482,7 @@
   /* border: 2px solid red; */
   width: 90%;
   margin-top: 10px;
+  position: relative;
   
 }
 
@@ -485,3 +538,138 @@
   text-align: center;
   width: 90%;
 }
+
+.video__slider {
+  display:flex;
+  justify-content: right;
+  align-items: center;
+  /* border: red solid 2px; */
+  height: 20px;
+}
+
+/* .video__slider input[type=range] {
+  appearance: none;
+  width: 80%;
+  height: 6px;
+  background-image:
+  linear-gradient(
+    to right,#6dd8d1 20%, #4bc67d 55%, #f1c40f 75%, #b94a48 100%);
+  outline: none;
+  cursor: pointer;
+  border-radius: 10px;
+} */
+
+.video__slider input[type=range] {
+  appearance: none;
+  width: 80%;
+  height: 6px;
+  background-image:
+    linear-gradient(
+      to right,#6dd8d1 20%, #4bc67d 55%, #f1c40f 75%, #b94a48 100%);
+  outline: none;
+  border-radius: 10px;
+}
+
+/* Chrome */
+.video__slider input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  background-color: #fff;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+/* Firefox */
+.video__slider input[type=range]::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  background-color: #fff;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+/* Safari */
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  background-color: #fff;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+/* IE and Edge */
+.video__slider input[type=range]::-ms-thumb {
+  width: 12px;
+  height: 12px;
+  background-color: #fff;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.video__slider input[type=range]::-ms-track {
+  width: 100%;
+  height: 6px;
+  background: transparent;
+  border-color: transparent;
+  color: transparent;
+}
+
+
+
+/* .video__slider input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 4mm;
+  height: 3mm;
+  background-color: #fff;
+  border-radius: 30%;
+} */
+
+ /* .video__slider input[type=range]::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  background-color: #fff;
+  border: 2px solid red;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.video__slider input[type=range]::-ms-thumb {
+  width: 12px;
+  height: 12px;
+  background-color: #fff;
+  border: 2px solid red;
+  border-radius: 50%;
+  cursor: pointer;
+}  */
+
+.smiley-display {
+  position: absolute;
+  top: 55%;
+  left: 7%; 
+  transform: translate(-50%, -50%);
+  /* background-color: white;
+  border-radius: 10%; */
+}
+
+
+/* .smiley-display img {
+  width: 40%;
+  height: 100%;
+} */
+
+.smiley-display img {
+  width: 40px; /* Set a fixed width */
+  height: auto; /* Maintain the aspect ratio */
+}
+
+.line-through {
+  text-decoration: line-through;
+}
+
+
+/* .smiley-display {
+  position: absolute;
+} */
+
