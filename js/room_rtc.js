@@ -1,11 +1,7 @@
 const APP_ID = "a0000f05b787400693fdcb10a8e4acec"
 
-// random UID if none is found in sessionstorage
-let uid = sessionStorage.getItem('uid')
-if(!uid){
-    uid = String(Math.floor(Math.random() * 10000))
-    sessionStorage.setItem('uid', uid)
-}
+const uid = sessionStorage.getItem('uid') || String(Math.floor(Math.random() * 10000));
+sessionStorage.setItem('uid', uid);
 
 let token = null;
 let client;
@@ -13,26 +9,30 @@ let client;
 let rtmClient;
 let channel;
 
-const queryString = window.location.search
-const urlParams = new URLSearchParams(queryString)
-let roomId = urlParams.get('room')
+const queryString = window.location.search;
+const urlParams = new URLSearchParams(queryString);
+const roomId = urlParams.get('room') || 'main';
 
-// if no roomname is given 
-if(!roomId){
-    roomId = 'main'
+const displayName = sessionStorage.getItem('display_name');
+if (!displayName) {
+    window.location = 'lobby.html';
 }
 
-// no name redirected to home
-let displayName = sessionStorage.getItem('display_name')
-if(!displayName){
-    window.location = 'lobby.html'
-}
+let localUser = [];
+let otherUsers = {};
 
-let localTracks = []
-let remoteUsers = {}
+const photoFiles = {
+    "one": "./images/emoji/cold-face-telegram.gif",
+    "two": "./images/emoji/face-in-clouds-telegram.gif",
+    "three": "./images/emoji/face-with-peeking-eye-telegram.gif",
+    "four": "./images/emoji/star-struck-telegram.gif",
+    "five": "./images/emoji/zany-face-telegram.gif",
+    "six": "./images/emoji/exploding-head-telegram.gif",
+    "seven": "./images/emoji/hot-face-telegram.gif"
+};
 
 
-let joinRoomInit = async () => {
+async function joinRoomInit() {
     // RTM client instance
     rtmClient = await AgoraRTM.createInstance(APP_ID)
     await rtmClient.login({uid,token})
@@ -45,20 +45,19 @@ let joinRoomInit = async () => {
     
     channel.on('ChannelMessage', handleChannelMessage)
 
-   
 
     client = AgoraRTC.createClient({mode:'rtc', codec:'vp8'})
     await client.join(APP_ID, roomId, token, uid)
 
-    client.on('user-published', handleUserPublished)
-    client.on('user-left', handleUserLeft)
+    client.on('user-published', addNewUsers)
+    client.on('user-left', removeUserDom)
 
-    joinStream()
+    addLocalUser()
 }
 
-// join video chat
-let joinStream = async () => {
-    localTracks = await AgoraRTC.createMicrophoneAndCameraTracks();
+// the local user join video chat
+async function addLocalUser() {
+    localUser = await AgoraRTC.createMicrophoneAndCameraTracks();
 
     let player = `<div class="video__container" id="user-container-${uid}">
                     <div class="video-player" id="user-${uid}"></div>
@@ -73,28 +72,26 @@ let joinStream = async () => {
 
     document.getElementById('streams__container').insertAdjacentHTML('beforeend', player);
     
-    localTracks[1].play(`user-${uid}`);
-    await client.publish([localTracks[0], localTracks[1]]);
+    localUser[1].play(`user-${uid}`);
+    await client.publish([localUser[0], localUser[1]]);
 };
 
-
-let handleUserPublished = async (user, mediaType) => {
-    remoteUsers[user.uid] = user;
+// Adding users to the video chat
+async function addNewUsers(user, mediaType) {
+    otherUsers[user.uid] = user;
 
     await client.subscribe(user, mediaType);
     let player = document.getElementById(`user-container-${user.uid}`);
     if (player === null) {
         player = `<div class="video__container" id="user-container-${user.uid}">
                     <div class="video-player" id="user-${user.uid}"></div>
-                    <div class="video__uid">${displayName}</div>
+                    <div class="video__uid">${user.uid}</div>
                     <div class="video__slider">
-                    <input type="range" id="slider" min="0" max="1000" value="500" step="0.5" class="smiley-slider" disabled>
+                        <input type="range" id="slider" min="0" max="1000" value="500" step="0.5" class="smiley-slider" disabled>
                     <div class="smiley-display">
                         <img src="./images/emoji/star-struck-telegram.gif" alt="smiley" />
                     </div>
                     </div> 
-                    
-                    
                 </div>`;
 
         document.getElementById('streams__container').insertAdjacentHTML('beforeend', player);
@@ -109,15 +106,6 @@ let handleUserPublished = async (user, mediaType) => {
     }
 };
 
-const photoFiles = {
-    "one": "./images/emoji/cold-face-telegram.gif",
-    "two": "./images/emoji/face-in-clouds-telegram.gif",
-    "three": "./images/emoji/face-with-peeking-eye-telegram.gif",
-    "four": "./images/emoji/star-struck-telegram.gif",
-    "five": "./images/emoji/zany-face-telegram.gif",
-    "six": "./images/emoji/exploding-head-telegram.gif",
-    "seven": "./images/emoji/hot-face-telegram.gif"
-};
 
 function updateSmiley(uid, value) {
     let slider = document.getElementById(`user-container-${uid}`).querySelector('.smiley-slider');
@@ -153,31 +141,30 @@ document.querySelectorAll('.smiley-slider').forEach(slider => {
     });
 });
 
-let raiseHand = async () => {
-    let message = {
-        messageType: 'raiseHand',
-        uid: uid
-    };
-    channel.sendMessage({ text: JSON.stringify(message) });
-};
 
-
-
-// remove user from DOM
-let handleUserLeft = async (user) => {
-    delete remoteUsers[user.uid]
-    document.getElementById(`user-container-${user.uid}`).remove()
-}
 
 // MUTE/UNMUTE
 let muteInterval;
 
-let toggleMic = async (e) => {
+async function toggleMic(e) {
     let button = e.currentTarget;
+    
+    const inactiveMicSvg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-mic-mute-fill" viewBox="0 0 16 16">
+        <path d="M13 8c0 .564-.094 1.107-.266 1.613l-.814-.814A4.02 4.02 0 0 0 12 8V7a.5.5 0 0 1 1 0v1zm-5 4c.818 0 1.578-.245 2.212-.667l.718.719a4.973 4.973 0 0 1-2.43.923V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 1 0v1a4 4 0 0 0 4 4zm3-9v4.879L5.158 2.037A3.001 3.001 0 0 1 11 3z"/>
+        <path d="M9.486 10.607 5 6.12V8a3 3 0 0 0 4.486 2.607zm-7.84-9.253 12 12 .708-.708-12-12-.708.708z"/>
+    </svg>`;
+    
+    const activeMicSvg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-mic" viewBox="0 0 16 16">
+      <path d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5z"/>
+      <path d="M10 8a2 2 0 1 1-4 0V3a2 2 0 1 1 4 0v5zM8 0a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V3a3 3 0 0 0-3-3z"/>
+    </svg>`;
 
-    if (localTracks[0].muted) {
-        await localTracks[0].setMuted(false);
+    if (localUser[0].muted) {
+        await localUser[0].setMuted(false);
         button.classList.add('active');
+        button.innerHTML = activeMicSvg;
         clearInterval(muteInterval); // Clear the interval when the microphone is unmuted
 
         // Start increasing the slider value by 1 every second when the microphone is unmuted
@@ -187,8 +174,9 @@ let toggleMic = async (e) => {
         }, 2000);
 
     } else {
-        await localTracks[0].setMuted(true);
+        await localUser[0].setMuted(true);
         button.classList.remove('active');
+        button.innerHTML = inactiveMicSvg;
         sendMuteUpdate(-1);
         clearInterval(muteInterval); // Clear the interval when the microphone is muted
 
@@ -203,27 +191,50 @@ let toggleMic = async (e) => {
 
 
 // Camera on/off
-let toggleCamera = async (e) => {
+async function toggleCamera(e) {
     let button = e.currentTarget
 
-    if(localTracks[1].muted){
-        await localTracks[1].setMuted(false)
-        button.classList.add('active')
+
+    const inactiveCameraSvg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#FF0000" class="bi bi-camera-video-off-fill" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M10.961 12.365a1.99 1.99 0 0 0 .522-1.103l3.11 1.382A1 1 0 0 0 16 11.731V4.269a1 1 0 0 0-1.406-.913l-3.111 1.382A2 2 0 0 0 9.5 3H4.272l6.69 9.365zm-10.114-9A2.001 2.001 0 0 0 0 5v6a2 2 0 0 0 2 2h5.728L.847 3.366zm9.746 11.925-10-14 .814-.58 10 14-.814.58z"/>
+    </svg>`;
+    
+    const activeCameraSvg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-camera-video" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M0 5a2 2 0 0 1 2-2h7.5a2 2 0 0 1 1.983 1.738l3.11-1.382A1 1 0 0 1 16 4.269v7.462a1 1 0 0 1-1.406.913l-3.111-1.382A2 2 0 0 1 9.5 13H2a2 2 0 0 1-2-2V5zm11.5 5.175 3.5 1.556V4.269l-3.5 1.556v4.35zM2 4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h7.5a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1H2z"/>
+    </svg>`;
+
+    if(localUser[1].muted){
+        await localUser[1].setMuted(false);
+        button.classList.add('active');
+        button.innerHTML = activeCameraSvg;
     }else{
-        await localTracks[1].setMuted(true)
-        button.classList.remove('active')
+        await localUser[1].setMuted(true);
+        button.classList.remove('active');
+        button.innerHTML = inactiveCameraSvg;
     }
 }
 
+
+// remove user from DOM
+async function removeUserDom(user) {
+    delete otherUsers[user.uid]
+    document.getElementById(`user-container-${user.uid}`).remove()
+}
+
+
 // exit
-let redirectToLobby = async () => {
+async function exit() {
     window.location = 'lobby.html';
 };
+
 
 // document.getElementById('handsUp-btn').addEventListener('click', raiseHand);
 document.getElementById('camera-btn').addEventListener('click', toggleCamera)
 document.getElementById('mic-btn').addEventListener('click', toggleMic)
-document.getElementById('leave-btn').addEventListener('click', redirectToLobby);
+document.getElementById('leave-btn').addEventListener('click', exit);
 
 
 joinRoomInit()
+

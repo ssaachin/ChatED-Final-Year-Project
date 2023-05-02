@@ -1,25 +1,20 @@
 body {
-  background-color: #363739;
+  background-color: #303030;
 }
 
 .room__lobby__container{
   display: flex;
   justify-content: center;
   align-items: center;
-  /* padding: 10%; */
-  /* border: solid 2px red; */
   margin: 20px;
-  /* background-image: url("../images/static_tv.gif"); */
   background-color: black;
   border-radius: 5px;
-  animation: bounce; /* referring directly to the animation's @keyframe declaration */
+  animation: bounce;
   animation-duration: 2s;
 }
 
 .lobby__header {
-  /* border: solid 2px red; */
   width: 100%;
-  /* margin: 50px; */
   max-width: 700px;
 }
 
@@ -28,10 +23,6 @@ body {
   letter-spacing: -3px;
 }
 
-/* .lobbyEd:hover {
-  transform: scale(1.1);
-} */
-
 
 .lobbyEd {
   color: teal;
@@ -39,22 +30,15 @@ body {
 
 .about__container {
   margin: 10px;
-  /* border: solid 2px red; */
-  
 }
-
-
-
-
 
 
 #form__container {
   width: 100%;
   max-width: 400px;
   border-radius: 0px;
-  background-color: #262625;
+  background-color: #1b1c1e;
   margin: 85px;
-  /* border: solid 2px red; */
   transition: all .5s ease-in-out;
 }
 
@@ -80,7 +64,7 @@ body {
   border-radius: 10px 10px 0 0;
   padding: 10px;
   text-align: center;
-  background-color: #363739;
+  background-color: #303030;
   font-size: 18px;
   line-height: 0;
 }
@@ -121,11 +105,9 @@ body {
   justify-content: center;
   padding: 10px;
   border-radius: 5px;
-  /* border: red 1px solid; */
 }
 
 .support__container {
-  /* border: red 1px solid; */
   margin: auto;
   width: 95%;
  
@@ -182,9 +164,8 @@ body {
     width: 100%;
     max-width: 400px;
     border-radius: 5px;
-    background-color: #262625;
+    background-color: #1b1c1e;
     margin: 30px;
-    /* border: solid 2px red; */
     transition: all .5s ease-in-out;
   }
 }
@@ -195,18 +176,16 @@ body {
     width: 100%;
     max-width: 400px;
     border-radius: 5px;
-    background-color: #262625;
+    background-color: #1b1c1e;
     margin: 20px;
-    /* border: solid 2px red; */
     transition: all .5s ease-in-out;
   }
 
   .support__container {
-    /* border: red 1px solid; */
-    margin: auto;
-    width: 100%;
-   
-  }
+  margin: auto;
+  width: 95%;
+ 
+}
 }
 
 
