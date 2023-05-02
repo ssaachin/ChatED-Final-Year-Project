@@ -25,6 +25,8 @@ async function handleChannelMessage(messageData, memberId) {
         addNotificationToDom(data.uid, data.action);
     } else if (data.type === 'taskEvent') {
         handleTaskEvent(data.eventType, data.payload);
+    }  else if (data.type === 'handsUp') {
+        addHandsUpNotificationToDom(data.uid);
     }
 }
 
@@ -59,6 +61,56 @@ function addMessageToDom(name, message) {
 
 let messageForm = document.getElementById('message__form');
 messageForm.addEventListener('submit', sendMessage);
+
+// Hands up toasts
+
+function getToastContainer() {
+    let toastContainer = document.getElementById('toast-container');
+
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.classList.add('toast-container', 'position-absolute', 'bottom-0', 'end-0', 'p-3');
+        toastContainer.id = 'toast-container';
+        document.body.appendChild(toastContainer);
+    }
+
+    return toastContainer;
+}
+
+function addHandsUpNotificationToDom(userId) {
+    let currentTime = formatTime(new Date());
+    let message = `User ${userId} raised their hand`;
+
+    let toastElement = `<div class="toast fade show" role="alert" aria-live="assertive" aria-atomic="true">
+                            <div class="toast-header">
+                                <strong class="me-auto">Hands Up Notification</strong>
+                                <small class="text-body-secondary">${currentTime}</small>
+                                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                            </div>
+                            <div class="toast-body">
+                                ${message}
+                            </div>
+                        </div>`;
+
+    let toastContainer = getToastContainer();
+    toastContainer.insertAdjacentHTML('beforeend', toastElement);
+
+    let toast = new bootstrap.Toast(toastContainer.querySelector('.toast:last-child'), { autohide: false });
+    toast.show();
+}
+
+
+
+
+document.getElementById('handsUp-btn').addEventListener('click', async function() {
+    const handsUpMessage = JSON.stringify({ 'type': 'handsUp', 'uid': uid });
+    await channel.sendMessage({ text: handsUpMessage });
+    addHandsUpNotificationToDom(uid);
+});
+
+
+
+
 
 // Notification Functions
 

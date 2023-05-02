@@ -450,6 +450,21 @@
   text-decoration: line-through;
 }
 
+.toast {
+  border-radius: 10px;
+}
+
+.toast-header {
+  
+  color: teal;
+  background-color: white;
+}
+
+.toast-body {
+  background-color: teal;
+  
+}
+
 /* responsive */
 
 @media (max-width: 1500px) {
