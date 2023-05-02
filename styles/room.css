@@ -224,11 +224,11 @@
   justify-content: center;
   align-items: center;
   overflow: hidden;
-  height: 300px;
-  width: 400px;
+  height: 310px;
+  width: 450px;
   flex-direction: column;
   margin: 4px;
-  padding: 10px;
+  padding: 15px;
 }
 
 .video-player{
@@ -289,8 +289,8 @@
   border: 5px solid green;
   border-radius: 5px;
   overflow: hidden;
-  height: 300px;
-  width: 400px;
+  height: 310px;
+  width: 450px;
   flex-direction: column;
 }
 
@@ -301,8 +301,8 @@
   border: 5px solid red;
   border-radius: 5px;
   overflow: hidden;
-  height: 300px;
-  width: 400px;
+  height: 310px;
+  width: 450px;
   flex-direction: column;
 }
 
