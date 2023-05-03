@@ -216,6 +216,15 @@ async function toggleCamera(e) {
     }
 }
 
+// async function toggleCamera() {
+
+//     if(localUser[1].muted){
+//         await localUser[1].setMuted(false);
+//     }else{
+//         await localUser[1].setMuted(true);
+//     }
+// }
+
 
 // remove user from DOM
 async function removeUserDom(user) {
@@ -230,7 +239,6 @@ async function exit() {
 };
 
 
-// document.getElementById('handsUp-btn').addEventListener('click', raiseHand);
 document.getElementById('camera-btn').addEventListener('click', toggleCamera)
 document.getElementById('mic-btn').addEventListener('click', toggleMic)
 document.getElementById('leave-btn').addEventListener('click', exit);
