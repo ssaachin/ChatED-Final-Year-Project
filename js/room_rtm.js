@@ -10,7 +10,7 @@ function formatTime(date) {
     return `${hours}:${minutes}`;
 }
 
-// Chat Functions
+
 
 async function handleChannelMessage(messageData, memberId) {
     let data = JSON.parse(messageData.text);
@@ -24,20 +24,14 @@ async function handleChannelMessage(messageData, memberId) {
     } else if (data.type === 'notification') {
         addNotificationToDom(data.uid, data.action);
     } else if (data.type === 'taskEvent') {
-        handleTaskEvent(data.eventType, data.payload);
+        handleTaskEvent(data.eventType, data.goalData);
     }  else if (data.type === 'handsUp') {
         addHandsUpNotificationToDom(data.uid);
     }
 }
 
-async function sendMessage(e) {
-    e.preventDefault();
 
-    let message = e.target.message.value;
-    await channel.sendMessage({ text: JSON.stringify({ 'type': 'chat', 'message': message, 'displayName': displayName }) });
-    addMessageToDom(displayName, message);
-    e.target.reset();
-}
+// Chat Functions
 
 function addMessageToDom(name, message) {
     let messagesWrapper = document.getElementById('messages');
@@ -59,8 +53,21 @@ function addMessageToDom(name, message) {
     }
 }
 
-let messageForm = document.getElementById('message__form');
-messageForm.addEventListener('submit', sendMessage);
+document.getElementById('message__form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    let message = e.target.message.value;
+    const messageData = JSON.stringify({ 
+        'type': 'chat', 
+        'message': message, 
+        'displayName': displayName })
+
+    await channel.sendMessage({ text: messageData });
+    addMessageToDom(displayName, message);
+    e.target.reset();
+});
+
+
 
 // Hands up toasts
 
@@ -103,7 +110,10 @@ function addHandsUpNotificationToDom(userId) {
 
 
 document.getElementById('handsUp-btn').addEventListener('click', async function() {
-    const handsUpMessage = JSON.stringify({ 'type': 'handsUp', 'uid': uid });
+    const handsUpMessage = JSON.stringify({ 
+        'type': 'handsUp', 
+        'uid': uid });
+
     await channel.sendMessage({ text: handsUpMessage });
     addHandsUpNotificationToDom(uid);
 });
@@ -112,17 +122,24 @@ document.getElementById('handsUp-btn').addEventListener('click', async function(
 
 
 
-// Notification Functions
+// Border Notification Functions
 
 function addNotificationToDom(userId, action) {
     let notificationContainer = document.getElementById('Notification__container');
     let currentTime = formatTime(new Date());
     let message;
+    let answer;
+    
+    if (action === 'green') {
+        answer = 'Yes';
+    } else {
+        answer = 'No';
+    }
 
     if (userId === uid) {
-        message = `You said ${action === 'green' ? 'Yes' : 'No'}`;
+        message = `You said ${answer}`;
     } else {
-        message = `User ${userId} said ${action === 'green' ? 'Yes' : 'No'}`;
+        message = `User ${userId} said ${answer}`;
     }
 
     let newNotification = `<div class="notification__wrapper" id="notifications__container">
@@ -141,7 +158,11 @@ function addNotificationToDom(userId, action) {
 document.getElementById('green-btn').addEventListener('click', async () => {
     changeUserBorderColor(uid, 'green');
     sendBorderColorChange('green', true);
-    const notificationMessage = JSON.stringify({ 'type': 'notification', 'uid': uid, 'action': 'green' });
+    const notificationMessage = JSON.stringify({ 
+        'type': 'notification', 
+        'uid': uid, 'action': 
+        'green' });
+
     await channel.sendMessage({ text: notificationMessage });
     addNotificationToDom(uid, 'green');
 });
@@ -149,7 +170,11 @@ document.getElementById('green-btn').addEventListener('click', async () => {
 document.getElementById('red-btn').addEventListener('click', async () => {
     changeUserBorderColor(uid, 'red');
     sendBorderColorChange('red', true);
-    const notificationMessage = JSON.stringify({ 'type': 'notification', 'uid': uid, 'action': 'red' });
+    const notificationMessage = JSON.stringify({ 
+        'type': 'notification', 
+        'uid': uid, 
+        'action': 'red' });
+
     await channel.sendMessage({ text: notificationMessage });
     addNotificationToDom(uid, 'red');
 });
@@ -164,8 +189,11 @@ function changeUserBorderColor(uid, color) {
     }
 }
 
-async function sendBorderColorChange(color, incrementSlider = false) {
-    const borderColorMessage = JSON.stringify({ 'type': 'borderColor', 'uid': uid, 'color': color, 'incrementSlider': incrementSlider });
+async function sendBorderColorChange(color) {
+    const borderColorMessage = JSON.stringify({ 
+        'type': 'borderColor', 
+        'uid': uid, 
+        'color': color });
     await channel.sendMessage({ text: borderColorMessage });
 }
 
@@ -178,95 +206,14 @@ function incrementSliderValue(uid, increment) {
 }
 
 async function sendMuteUpdate(incrementValue) {
-    const muteUpdateMessage = JSON.stringify({ 'type': 'muteUpdate', 'uid': uid, 'incrementValue': incrementValue });
+    const muteUpdateMessage = JSON.stringify({ 
+        'type': 'muteUpdate', 
+        'uid': uid, 
+        'incrementValue': incrementValue });
     await channel.sendMessage({ text: muteUpdateMessage });
 }
 
 // Task Functions
-
-function handleTaskEvent(eventType, payload) {
-    if (eventType === 'taskAdded') {
-        addTask(payload);
-    } else if (eventType === 'taskEdited') {
-        editTaskFromPayload(payload.oldTask, payload.newTask);
-    } else if (eventType === 'taskDeleted') {
-        deleteTaskFromPayload(payload);
-    }
-}
-
-function addTask(task) {
-    let tasksWrapper = document.getElementById('tasks');
-
-    let newTask = ` <div class="task__wrapper">
-                        <p class="task__text">${task}</p>
-                        <button class="task__edit"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
-                            <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
-                            <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
-                        </svg></button>
-                        <button class="task__delete">X</button>
-                    </div>`;
-
-    tasksWrapper.insertAdjacentHTML('beforeend', newTask);
-
-    let taskWrapper = tasksWrapper.lastElementChild;
-    taskWrapper.querySelector('.task__text').addEventListener('click', () => {
-        taskWrapper.querySelector('.task__text').classList.toggle('line-through');
-    });
-    taskWrapper.querySelector('.task__edit').addEventListener('click', editTask);
-    taskWrapper.querySelector('.task__delete').addEventListener('click', deleteTask);
-}
-
-async function editTask(e) {
-    let taskText = e.target.previousElementSibling;
-    let currentText = taskText.innerText;
-    let newText = prompt("Edit task:", currentText);
-
-    if (newText) {
-        taskText.innerText = newText;
-        const editTaskMessage = JSON.stringify({
-            'type': 'taskEvent',
-            'eventType': 'taskEdited',
-            'payload': { 'oldTask': currentText, 'newTask': newText }
-        });
-        await channel.sendMessage({ text: editTaskMessage });
-    }
-}
-
-
-async function deleteTask(e) {
-    let taskWrapper = e.target.parentElement;
-    let taskText = taskWrapper.querySelector(".task__text").innerText;
-    taskWrapper.remove();
-
-    const deleteTaskMessage = JSON.stringify({
-        'type': 'taskEvent',
-        'eventType': 'taskDeleted',
-        'payload': taskText
-    });
-    await channel.sendMessage({ text: deleteTaskMessage });
-}
-
-function editTaskFromPayload(oldTask, newTask) {
-    let tasksWrapper = document.getElementById('tasks');
-    let taskElements = tasksWrapper.querySelectorAll('.task__wrapper');
-    taskElements.forEach(taskElement => {
-        let taskTextElement = taskElement.querySelector('.task__text');
-        if (taskTextElement.innerText === oldTask) {
-            taskTextElement.innerText = newTask;
-        }
-    });
-}
-
-function deleteTaskFromPayload(taskText) {
-    let tasksWrapper = document.getElementById('tasks');
-    let taskElements = tasksWrapper.querySelectorAll('.task__wrapper');
-    taskElements.forEach(taskElement => {
-        let taskTextElement = taskElement.querySelector('.task__text');
-        if (taskTextElement.innerText === taskText) {
-            taskElement.remove();
-        }
-    });
-}
 
 let taskForm = document.getElementById('task__form');
 taskForm.addEventListener('submit', async (e) => {
@@ -279,9 +226,70 @@ taskForm.addEventListener('submit', async (e) => {
 });
 
 async function sendTask(task) {
-    const taskMessage = JSON.stringify({ 'type': 'taskEvent', 'eventType': 'taskAdded', 'payload': task });
+    const taskMessage = JSON.stringify({ 
+        'type': 'taskEvent', 
+        'eventType': 'taskAdded', 
+        'goalData': task });
     await channel.sendMessage({ text: taskMessage });
 }
+
+function handleTaskEvent(eventType, goalData) {
+    if (eventType === 'taskAdded') {
+        addTask(goalData);
+    } else if (eventType === 'taskDeleted') {
+        deleteTaskFromGoals(goalData);
+    }
+}
+
+
+function addTask(task) {
+    let tasksWrapper = document.getElementById('tasks');
+
+    let newTask = ` <div class="task__wrapper">
+                        <p class="task__text">${task}</p>
+                        <button class="task__delete">X</button>
+                    </div>`;
+
+    tasksWrapper.insertAdjacentHTML('beforeend', newTask);
+
+    let taskWrapper = tasksWrapper.lastElementChild;
+    taskWrapper.querySelector('.task__text').addEventListener('click', () => {
+        taskWrapper.querySelector('.task__text').classList.toggle('line-through');
+    });
+    taskWrapper.querySelector('.task__delete').addEventListener('click', deleteTask);
+}
+
+
+
+async function deleteTask(e) {
+    let taskWrapper = e.target.parentElement;
+    let taskText = taskWrapper.querySelector(".task__text").innerText;
+    taskWrapper.remove();
+
+    const deleteTaskMessage = JSON.stringify({
+        'type': 'taskEvent',
+        'eventType': 'taskDeleted',
+        'goalData': taskText
+    });
+    
+    await channel.sendMessage({ text: deleteTaskMessage });
+}
+
+
+function deleteTaskFromGoals(taskText) {
+    let tasksWrapper = document.getElementById('tasks');
+    let taskElements = tasksWrapper.querySelectorAll('.task__wrapper');
+    taskElements.forEach(taskElement => {
+        let taskTextElement = taskElement.querySelector('.task__text');
+        if (taskTextElement.innerText === taskText) {
+            taskElement.remove();
+        }
+    });
+}
+
+
+
+
 
 async function leaveChannel() {
     await channel.leave();
@@ -289,6 +297,13 @@ async function leaveChannel() {
 }
 
 window.addEventListener('beforeunload', leaveChannel);
+
+
+
+
+
+
+
 
 
 
