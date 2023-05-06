@@ -15,7 +15,7 @@ const roomId = urlParams.get('room') || 'main';
 
 const displayName = sessionStorage.getItem('display_name');
 if (!displayName) {
-    window.location = 'lobby.html';
+    window.location = 'home.html';
 }
 
 let localUser = [];

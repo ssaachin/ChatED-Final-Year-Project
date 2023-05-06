@@ -19,16 +19,23 @@ async function handleChannelMessage(messageData, memberId) {
         addMessageToDom(data.displayName, data.message);
     } else if (data.type === 'borderColor') {
         changeUserBorderColor(data.uid, data.color);
+        incrementSliderValue(data.uid, data.incrementValue);
     } else if (data.type === 'muteUpdate') {
         incrementSliderValue(data.uid, data.incrementValue);
     } else if (data.type === 'notification') {
         addNotificationToDom(data.uid, data.action);
     } else if (data.type === 'taskEvent') {
-        handleTaskEvent(data.eventType, data.goalData);
-    }  else if (data.type === 'handsUp') {
+        if (data.eventType === 'taskAdded') {
+            addTask(data.goalData);
+        } else if (data.eventType === 'taskDeleted') {
+            deleteTaskFromGoals(data.goalData); // Call deleteTaskFromGoals when the 'taskDeleted' event is received
+        }
+    } else if (data.type === 'handsUp') {
+        incrementSliderValue(data.uid, data.incrementValue);
         addHandsUpNotificationToDom(data.uid);
     }
 }
+
 
 
 // Chat Functions
@@ -110,9 +117,11 @@ function addHandsUpNotificationToDom(userId) {
 
 
 document.getElementById('handsUp-btn').addEventListener('click', async function() {
+    incrementSliderValue(uid, 1)
     const handsUpMessage = JSON.stringify({ 
         'type': 'handsUp', 
-        'uid': uid });
+        'uid': uid,
+        'incrementValue': 1});
 
     await channel.sendMessage({ text: handsUpMessage });
     addHandsUpNotificationToDom(uid);
@@ -155,9 +164,11 @@ function addNotificationToDom(userId, action) {
     }
 }
 
+
 document.getElementById('green-btn').addEventListener('click', async () => {
     changeUserBorderColor(uid, 'green');
-    sendBorderColorChange('green', true);
+    incrementSliderValue(uid, 2);
+    sendBorderColorChange('green', 2);
     const notificationMessage = JSON.stringify({ 
         'type': 'notification', 
         'uid': uid, 'action': 
@@ -169,7 +180,8 @@ document.getElementById('green-btn').addEventListener('click', async () => {
 
 document.getElementById('red-btn').addEventListener('click', async () => {
     changeUserBorderColor(uid, 'red');
-    sendBorderColorChange('red', true);
+    incrementSliderValue(uid, 2);
+    sendBorderColorChange('red', 2);
     const notificationMessage = JSON.stringify({ 
         'type': 'notification', 
         'uid': uid, 
@@ -178,6 +190,8 @@ document.getElementById('red-btn').addEventListener('click', async () => {
     await channel.sendMessage({ text: notificationMessage });
     addNotificationToDom(uid, 'red');
 });
+
+
 
 // User Border Color Functions
 
@@ -189,13 +203,16 @@ function changeUserBorderColor(uid, color) {
     }
 }
 
-async function sendBorderColorChange(color) {
+async function sendBorderColorChange(color, incrementValue) {
     const borderColorMessage = JSON.stringify({ 
         'type': 'borderColor', 
         'uid': uid, 
-        'color': color });
+        'color': color,
+        'incrementValue': incrementValue
+    });
     await channel.sendMessage({ text: borderColorMessage });
 }
+
 
 // Mute Update Functions
 
@@ -215,31 +232,20 @@ async function sendMuteUpdate(incrementValue) {
 
 // Task Functions
 
-let taskForm = document.getElementById('task__form');
-taskForm.addEventListener('submit', async (e) => {
+document.getElementById('task__form').addEventListener('submit', async (e) => {
     e.preventDefault();
 
     let task = e.target.task.value;
-    await sendTask(task);
-    addTask(task);
-    e.target.reset();
-});
-
-async function sendTask(task) {
     const taskMessage = JSON.stringify({ 
         'type': 'taskEvent', 
         'eventType': 'taskAdded', 
-        'goalData': task });
+        'goalData': task 
+    });
     await channel.sendMessage({ text: taskMessage });
-}
 
-function handleTaskEvent(eventType, goalData) {
-    if (eventType === 'taskAdded') {
-        addTask(goalData);
-    } else if (eventType === 'taskDeleted') {
-        deleteTaskFromGoals(goalData);
-    }
-}
+    addTask(task);
+    e.target.reset();
+});
 
 
 function addTask(task) {
@@ -264,22 +270,23 @@ function addTask(task) {
 async function deleteTask(e) {
     let taskWrapper = e.target.parentElement;
     let taskText = taskWrapper.querySelector(".task__text").innerText;
-    taskWrapper.remove();
+    taskWrapper.remove(); // Change this line
 
     const deleteTaskMessage = JSON.stringify({
         'type': 'taskEvent',
         'eventType': 'taskDeleted',
         'goalData': taskText
     });
-    
+
     await channel.sendMessage({ text: deleteTaskMessage });
+    removeTaskFromDOM(taskText);
 }
 
 
-function deleteTaskFromGoals(taskText) {
+function removeTaskFromDOM(taskText) {
     let tasksWrapper = document.getElementById('tasks');
     let taskElements = tasksWrapper.querySelectorAll('.task__wrapper');
-    taskElements.forEach(taskElement => {
+    taskElements.forEach(function(taskElement) {
         let taskTextElement = taskElement.querySelector('.task__text');
         if (taskTextElement.innerText === taskText) {
             taskElement.remove();
@@ -288,7 +295,9 @@ function deleteTaskFromGoals(taskText) {
 }
 
 
-
+function deleteTaskFromGoals(taskText) {
+    removeTaskFromDOM(taskText);
+}
 
 
 async function leaveChannel() {
