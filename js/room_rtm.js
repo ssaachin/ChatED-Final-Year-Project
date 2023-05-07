@@ -214,12 +214,14 @@ async function sendBorderColorChange(color, incrementValue) {
 }
 
 
-// Mute Update Functions
+// Slider Update Functions
 
 function incrementSliderValue(uid, increment) {
     let slider = document.getElementById(`user-container-${uid}`).querySelector('.smiley-slider');
     let newValue = parseFloat(slider.value) + increment;
     updateSmiley(uid, newValue);
+
+
 }
 
 async function sendMuteUpdate(incrementValue) {
@@ -229,6 +231,7 @@ async function sendMuteUpdate(incrementValue) {
         'incrementValue': incrementValue });
     await channel.sendMessage({ text: muteUpdateMessage });
 }
+
 
 // Task Functions
 

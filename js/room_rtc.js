@@ -133,15 +133,6 @@ function updateSmiley(uid, value) {
 }
 
 
-document.querySelectorAll('.smiley-slider').forEach(slider => {
-    slider.addEventListener('input', e => {
-        let uid = e.target.closest('.video__container').id.split('-')[2];
-        let newValue = parseFloat(e.target.value);
-        updateSmiley(uid, newValue);
-    });
-});
-
-
 
 // MUTE/UNMUTE
 let muteInterval;
@@ -165,10 +156,10 @@ async function toggleMic(e) {
         await localUser[0].setMuted(false);
         button.classList.add('active');
         button.innerHTML = activeMicSvg;
-        clearInterval(muteInterval); // Clear the interval when the microphone is unmuted
+        clearInterval(muteInterval); 
 
-        // Start increasing the slider value by 1 every second when the microphone is unmuted
-        muteInterval = setInterval(() => {
+
+        muteInterval = setInterval(function() {
             incrementSliderValue(uid, 5);
             sendMuteUpdate(5);
         }, 2000);
@@ -177,16 +168,18 @@ async function toggleMic(e) {
         await localUser[0].setMuted(true);
         button.classList.remove('active');
         button.innerHTML = inactiveMicSvg;
-        sendMuteUpdate(-1);
-        clearInterval(muteInterval); // Clear the interval when the microphone is muted
+        clearInterval(muteInterval); 
 
-        // Start decreasing the slider value by 1 every second when the microphone is muted
-        muteInterval = setInterval(() => {
+        
+        muteInterval = setInterval(function() {
             incrementSliderValue(uid, -2);
             sendMuteUpdate(-2);
         }, 2000);
     }
 };
+
+
+
 
 
 
@@ -216,14 +209,6 @@ async function toggleCamera(e) {
     }
 }
 
-// async function toggleCamera() {
-
-//     if(localUser[1].muted){
-//         await localUser[1].setMuted(false);
-//     }else{
-//         await localUser[1].setMuted(true);
-//     }
-// }
 
 
 // remove user from DOM
