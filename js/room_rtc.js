@@ -1,3 +1,5 @@
+// This is the App id which was provided from agora, which can be collected from your own individual account.
+// If released and hosted on a platform like railways, put the ID in service variables for safety
 const APP_ID = "a0000f05b787400693fdcb10a8e4acec"
 
 const uid = sessionStorage.getItem('uid') || String(Math.floor(Math.random() * 10000));
@@ -20,6 +22,8 @@ if (!displayName) {
 
 let localUser = [];
 let otherUsers = {};
+
+// These are the different emojis stores as in an object which is used to change the slider emojis
 
 const photoFiles = {
     "one": "./images/emoji/cold-face-telegram.gif",
@@ -55,7 +59,7 @@ async function joinRoomInit() {
     addLocalUser()
 }
 
-// the local user join video chat
+// This provides the local user container frame of their video and audio tracks
 async function addLocalUser() {
     localUser = await AgoraRTC.createMicrophoneAndCameraTracks();
 
@@ -76,7 +80,8 @@ async function addLocalUser() {
     await client.publish([localUser[0], localUser[1]]);
 };
 
-// Adding users to the video chat
+// When a user join into the videochat,
+// this will create an individual frame for the user which provides video and audio tracks to others 
 async function addNewUsers(user, mediaType) {
     otherUsers[user.uid] = user;
 
@@ -107,6 +112,8 @@ async function addNewUsers(user, mediaType) {
 };
 
 
+// Depending on the amount of points, this will change the emoji pictures on the slider 
+
 function updateSmiley(uid, value) {
     let slider = document.getElementById(`user-container-${uid}`).querySelector('.smiley-slider');
     let smileyDisplay = document.getElementById(`user-container-${uid}`).querySelector('.smiley-display');
@@ -134,7 +141,9 @@ function updateSmiley(uid, value) {
 
 
 
-// MUTE/UNMUTE
+// toggles the microphone on/off and the svg of the microphone changes 
+// While the microphone is on, the slider increase by 5 points every 2 seconds
+// while the microphone is off, the slider decrease by 2 points every 2 seconds
 let muteInterval;
 
 async function toggleMic(e) {
@@ -183,7 +192,7 @@ async function toggleMic(e) {
 
 
 
-// Camera on/off
+// toggles the Camera on/off while changing the SVG icon for the local user
 async function toggleCamera(e) {
     let button = e.currentTarget
 
@@ -211,16 +220,16 @@ async function toggleCamera(e) {
 
 
 
-// remove user from DOM
+// This removes user from DOM in the video call when they trigger the leave button
 async function removeUserDom(user) {
     delete otherUsers[user.uid]
     document.getElementById(`user-container-${user.uid}`).remove()
 }
 
 
-// exit
+// exit button redirects to the home page
 async function exit() {
-    window.location = 'lobby.html';
+    window.location = 'home.html';
 };
 
 

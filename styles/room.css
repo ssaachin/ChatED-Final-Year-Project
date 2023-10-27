@@ -342,14 +342,6 @@
   width: 90%;
 }
 
-/* .video__slider {
-  display:flex;
-  justify-content: right;
-  align-items: center;
-  height: 20px;
-} */
-
-
 /* video container elements */
 
 .video__slider {
@@ -415,7 +407,7 @@
   cursor: pointer;
 }
 
-/* IE and Edge */
+/* Edge */
 .video__slider input[type=range]::-ms-thumb {
   width: 12px;
   height: 12px;

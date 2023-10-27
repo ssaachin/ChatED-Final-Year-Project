@@ -1,4 +1,6 @@
-// Time Functions
+// Time Functions which is used in multiple parts of the code
+// displays the time at when an user sent a something
+// For Chat, Hands up and Notification features
 
 function formatTime(date) {
     let hours = date.getHours();
@@ -11,7 +13,7 @@ function formatTime(date) {
 }
 
 
-
+// Handles the incoming channel messages and perform actions based on the feature the user calls.
 async function handleChannelMessage(messageData, memberId) {
     let data = JSON.parse(messageData.text);
 
@@ -28,7 +30,7 @@ async function handleChannelMessage(messageData, memberId) {
         if (data.eventType === 'taskAdded') {
             addTask(data.goalData);
         } else if (data.eventType === 'taskDeleted') {
-            deleteTaskFromGoals(data.goalData); // Call deleteTaskFromGoals when the 'taskDeleted' event is received
+            deleteTaskFromGoals(data.goalData);
         }
     } else if (data.type === 'handsUp') {
         incrementSliderValue(data.uid, data.incrementValue);
@@ -38,7 +40,8 @@ async function handleChannelMessage(messageData, memberId) {
 
 
 
-// Chat Functions
+// This displays the messages that the user has sent on the group call
+// The html structure is built here which displays in the chat container 
 
 function addMessageToDom(name, message) {
     let messagesWrapper = document.getElementById('messages');
@@ -220,7 +223,6 @@ function incrementSliderValue(uid, increment) {
     let slider = document.getElementById(`user-container-${uid}`).querySelector('.smiley-slider');
     let newValue = parseFloat(slider.value) + increment;
     updateSmiley(uid, newValue);
-
 
 }
 
